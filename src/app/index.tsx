@@ -1,12 +1,19 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable } from "react-native";
 import { Image } from "expo-image";
+import { useState } from "react";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-const START_MESSAGES = [
-  { id: "1", text: "Hi!", mine: false },
-  { id: "2", text: "Hello Awa 👋", mine: true },
-  { id: "3", text: "Ready for the lab?", mine: false },
-];
+const START_MESSAGES = Array.from({ length: 300 }, (_, i) => ({
+  id: String(i),
+  text: `Message number ${i + 1}`,
+  mine: i % 3 === 0,
+}));
 function Bubble({ text, mine }: { text: string; mine?: boolean }) {
   return (
     <View style={[styles.bubble, mine && styles.bubbleMine]}>
@@ -33,14 +40,17 @@ export default function Chat() {
         <Image source="https://i.pravatar.cc/100" style={styles.avatar} />
         <Text style={styles.name}>Awa Diop</Text>
       </View>
-      <ScrollView
+      <FlatList
+        data={messages}
+        keyExtractor={(m) => m.id}
+        renderItem={({ item }) => <Bubble text={item.text} mine={item.mine} />}
         style={styles.messages}
         contentContainerStyle={{ paddingVertical: 8 }}
-      >
-        {messages.map((m) => (
-          <Bubble key={m.id} text={m.text} mine={m.mine} />
-        ))}
-      </ScrollView>
+        ListEmptyComponent={
+          <Text style={styles.empty}>No messages yet. Say hello.</Text>
+        }
+        ListHeaderComponent={<Text style={styles.dateLabel}>Today</Text>}
+      />
       <View style={styles.footer}>
         <TextInput
           style={styles.input}
@@ -107,6 +117,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#1a5276",
     justifyContent: "center",
     alignItems: "center",
+  },
+  empty: { textAlign: "center", color: "#888", paddingVertical: 32 },
+  dateLabel: {
+    textAlign: "center",
+    color: "#888",
+    fontSize: 12,
+    paddingBottom: 8,
   },
   sendLabel: { color: "#fff", fontSize: 16 },
 });
